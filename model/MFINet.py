@@ -1,3 +1,7 @@
+"""
+    References:
+        "MFI-Net: Multiscale Feature Interaction Network for Retinal Vessel Segmentation"
+"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
