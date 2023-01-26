@@ -26,7 +26,6 @@ class myDataset(Dataset):  # 定义自己的数据类myDataset，继承的抽象
             if data_mode == "train":
                 self.image_files = image_files[0:180] 
             elif data_mode == "val" :
-                # self.image_files = image_files[200: 300]
                 self.image_files = image_files[180: 200]
             else:
                 self.image_files = image_files[200: 300]
