@@ -1,3 +1,7 @@
+"""
+  Reference: "Vessel-Net Retinal Vessel SegmentationUnder Multi-path Supervision"
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
