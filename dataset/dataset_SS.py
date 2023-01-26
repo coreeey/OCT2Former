@@ -22,10 +22,9 @@ class myDataset(Dataset):  # 定义自己的数据类myDataset，继承的抽象
                 reader = csv.reader(f)
                 image_files = list(reader)[0]
             if data_mode == "train":
-                self.image_files = image_files[0: 27]# + image_files[55:]#
-            # elif data_mode == "val" :
-            #     self.image_files = image_files[27: 30]
-            # elif data_mode == "test":
+                self.image_files = image_files[0: 27]
+            elif data_mode == "val" :
+                 self.image_files = image_files[27: 30]
             else:
                 self.image_files = image_files[30: 55]
 
