@@ -34,7 +34,7 @@ Prerequisites
 
 
 ### FOR ROSE1 dataset
- python train.py  --dataset='ROSE' \
+ > python train.py --dataset='ROSE' \
  --num_epochs=100 \
  --dataset_file_list='utils/ROSE-1.csv' \
  --data_root=$ROSE-1-SS-DATA-PATH \
@@ -46,7 +46,7 @@ Prerequisites
  --img_aug \
  --cuda_id=6 
  OR
- sh trainROSE.sh
+ > sh trainROSE.sh
  
  
 ### FOR OCTA-6M dataset
