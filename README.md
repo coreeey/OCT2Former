@@ -17,7 +17,7 @@ Prerequisites
 
 <span id="jump2"></span>
 ### FOR OCTA-SS dataset
- > python train.py  --dataset='OCTA-SS' 
+ > python train.py  --dataset='OCTA-SS' \
  --num_epochs=100 \
  --dataset_file_list='utils/OCTA-SS.csv' \
  --data_root=$OCTA-SS-DATA-PATH \
