@@ -49,26 +49,7 @@ The official code of OCT2Former: A retinal OCT-angiography vessel segmentation t
  OR
  
  > sh trainROSE.sh
- 
- 
-### FOR OCTA-6M dataset
- > python train.py  
- --dataset='OCTA-6M' \
- --num_epochs=100 \
- --dataset_file_list='utils/OCTA_6M.csv' \
- --data_root=$OCTA-6M-OCTA-DATA-PATH  \
- --data_root_aux=$OCTA-6M-OCT-DATA-PATH \
- --target_root=$OCTA-6M-LABEL-PATH \
- --run_dir='6M' \
- --in_channel=2 \
- --batch_size=2 \
- --lr=5e-4 \
- --img_aug \
- --cuda_id=6
- 
- OR
- 
- > sh train6M.sh
+
 
 ### FOR OCTA-3M dataset
  > python train.py  
@@ -87,3 +68,23 @@ The official code of OCT2Former: A retinal OCT-angiography vessel segmentation t
  OR
  
  > sh train3M.sh
+ 
+ 
+ ### FOR OCTA-6M dataset
+ > python train.py  
+ --dataset='OCTA-6M' \
+ --num_epochs=100 \
+ --dataset_file_list='utils/OCTA_6M.csv' \
+ --data_root=$OCTA-6M-OCTA-DATA-PATH  \
+ --data_root_aux=$OCTA-6M-OCT-DATA-PATH \
+ --target_root=$OCTA-6M-LABEL-PATH \
+ --run_dir='6M' \
+ --in_channel=2 \
+ --batch_size=2 \
+ --lr=5e-4 \
+ --img_aug \
+ --cuda_id=6
+ 
+ OR
+ 
+ > sh train6M.sh
