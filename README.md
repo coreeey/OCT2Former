@@ -13,6 +13,7 @@ The official code of OCT2Former: A retinal OCT-angiography vessel segmentation t
 * visdom
 * pytorch
 * torchvision
+* pandas
 
 <span id="jump2"></span>
 ### FOR OCTA-SS dataset
