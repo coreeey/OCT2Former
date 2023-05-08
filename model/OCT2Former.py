@@ -1,11 +1,3 @@
-#
-  version 2 of OCT2Former
-  
-  import OCT2Former
-  model = OCT2Former(in_channel, n_classes)
-  
-#
-
 import torch
 import torch.nn as nn
 from functools import partial
@@ -144,11 +136,11 @@ class DABlock(nn.Module):
         x = x + self.alpha * x_conv
         return x
 
-class PatchEmbed(nn.Module):
-    """ Image to Patch Embedding"""
+class GroupEmbed(nn.Module):
+
     def __init__(self, in_ch=3, patch=3, stride=2, out_ch=768, with_pos=False):
         super().__init__()
-        self.conv = nn.Conv2d(in_ch, out_ch, kernel_size=patch, stride=stride, padding=1)
+        self.conv = nn.Conv2d(in_ch, out_ch, kernel_size=patch, stride=stride, padding=1, groups=1)
         self.norm = nn.BatchNorm2d(out_ch)
 
     def forward(self, x):
@@ -182,36 +174,37 @@ class BasicStem(nn.Module):
         return x
 
 class DTA(nn.Module):
-	def __init__(self, k=130,stage_num=3):
-	    super(DTA, self).__init__()
-	    self.pool = nn.AdaptiveMaxPool1d(k)
-	    self.stage_num = stage_num
-	def forward(self, x1, x2):
-	    k = self.pool(x1)
-	    k = self._l2norm(k, dim=1)
-	    q = self.pool(x2)
-	    q = self._l2norm(q, dim=1)
-	    x1 = rearrange(x1, 'b n c -> b c n')
-	    x2 = rearrange(x2, 'b n c -> b c n')
+    def __init__(self, k=130,stage_num=3):
+        super(DTA, self).__init__()
+        self.pool = nn.AdaptiveMaxPool1d(k)
+        self.stage_num = stage_num
+
+    def forward(self, x1, x2):
+        k = self.pool(x1)
+        k = self._l2norm(k, dim=1)
+        q = self.pool(x2)
+        q = self._l2norm(q, dim=1)
+        x1 = rearrange(x1, 'b n c -> b c n')
+        x2 = rearrange(x2, 'b n c -> b c n')
 	    #with torch.no_grad():
-	    for i in range(self.stage_num):
-                z1 = torch.bmm(x1, k)  # b * n * k
-                z1 = F.softmax(z1, dim=2)  # b * n * k
-                z1_ = self._l2norm(z1, dim=1)  #
-                x1_ = x1.permute(0, 2, 1)  ###VVVb*n*c
-                k = torch.bmm(x1_, z1_)  # b * c * k
-                k = self._l2norm(k, dim=1)
+        for i in range(self.stage_num):
+            z1 = torch.bmm(x1, k)  
+            z1 = F.softmax(z1, dim=2) 
+            z1_ = self._l2norm(z1, dim=1) 
+            x1_ = x1.permute(0, 2, 1) 
+            k = torch.bmm(x1_, z1_) 
+            k = self._l2norm(k, dim=1)
 
-                z2 = torch.bmm(x2, q)  # b * n * k
-                z2 = F.softmax(z2, dim=2)  # b * n * k
-                z2_ = self._l2norm(z2, dim=1)  #
-                x2_ = x2.permute(0, 2, 1)  ###VVVb*n*c
-                q = torch.bmm(x2_, z2_)  # b * c * k
-                q = self._l2norm(q, dim=1)
-	    return k, q
+            z2 = torch.bmm(x2, q)  
+            z2 = F.softmax(z2, dim=2) 
+            z2_ = self._l2norm(z2, dim=1)  
+            x2_ = x2.permute(0, 2, 1) 
+            q = torch.bmm(x2_, z2_) 
+            q = self._l2norm(q, dim=1)
+        return k, q
 
-	def _l2norm(self, inp, dim):
-		return inp / (1e-6 + inp.norm(dim=dim, keepdim=True))
+    def _l2norm(self, inp, dim):
+        return inp / (1e-6 + inp.norm(dim=dim, keepdim=True))
 
 class double_conv(nn.Module):
     def __init__(self, in_channel, out_channel, act=nn.ReLU):
@@ -239,7 +232,6 @@ class single_conv(nn.Module):
             nn.Conv2d(in_channel, out_channel, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(out_channel),
             act(),
-
         )        
 
     def forward(self, x):
@@ -316,10 +308,10 @@ class DA_encoder(nn.Module):
         self.k = k
 
         self.stem = BasicStem(in_ch=in_chans, out_ch=embed_dims[0], with_pos=True)
-        self.pe2 = PatchEmbed(in_ch=embed_dims[0], out_ch=embed_dims[1], with_pos=True)
-        self.pe3 = PatchEmbed(in_ch=embed_dims[1], out_ch=embed_dims[2], with_pos=True)
-        # self.pe4 = PatchEmbed(in_ch=embed_dims[2], out_ch=embed_dims[3], with_pos=True)
-        # self.pe5 = PatchEmbed(in_ch=embed_dims[3], out_ch=embed_dims[4], with_pos=True)
+        self.pe2 = GroupEmbed(in_ch=embed_dims[0], out_ch=embed_dims[1], with_pos=True)
+        self.pe3 = GroupEmbed(in_ch=embed_dims[1], out_ch=embed_dims[2], with_pos=True)
+        # self.pe4 = GroupEmbed(in_ch=embed_dims[2], out_ch=embed_dims[3], with_pos=True)
+        # self.pe5 = GroupEmbed(in_ch=embed_dims[3], out_ch=embed_dims[4], with_pos=True)
 
         self.fea1_1 =DABlock(embed_dims[0], num_heads[0], k=self.k[0], mlp_ratio=mlp_ratios[0],norm_layer=norm_layer)
 
@@ -348,6 +340,7 @@ class DA_encoder(nn.Module):
         elif isinstance(m, (nn.LayerNorm, nn.BatchNorm2d)):
             nn.init.constant_(m.weight, 1.0)
             nn.init.constant_(m.bias, 0)
+
     def forward(self, x):
         outputs = dict()
         size = x.size()[2:]
@@ -384,7 +377,7 @@ class DA_encoder(nn.Module):
 
 class OCT2Former(nn.Module):
     def __init__(self, in_chans=3, num_classes=2, embed_dims=[64, 128, 256, 512, 1024],k=[128, 128, 128, 128, 128],num_heads=[1, 2, 4, 8, 16], mlp_ratios=[4, 4, 4, 4, 4],
-                 depths=[1, 1, 1, 2, 1],norm_layer=nn.LayerNorm, aux=False):
+                 depths=[1, 1, 1, 2, 1],norm_layer=nn.LayerNorm, aux=False, spec_inter=False):
         super().__init__()
         #k=[128,128,128,128,128]
         filters = [256, 512, 1024, 2048, 4096]
@@ -398,9 +391,15 @@ class OCT2Former(nn.Module):
 
         self.base_encoder = DA_encoder(in_chans, embed_dims, k, num_heads, mlp_ratios, norm_layer)
 
-        self.up0 = up(embed_dims[3])#, size=(23, 23))
-        self.up1 = up(embed_dims[2])#, 'CARA')
-        self.up2 = up(embed_dims[1])#, size=(91, 91))#, 'CARA')
+        if spec_inter:
+            self.up0 = up(embed_dims[3], size=(23, 23))
+            self.up1 = up(embed_dims[2]) #, 'CARA')
+            self.up2 = up(embed_dims[1], size=(91, 91))#, 'CARA')
+        else:
+            self.up0 = up(embed_dims[3])
+            self.up1 = up(embed_dims[2])
+            self.up2 = up(embed_dims[1])
+
 
         # self.donv6 = double_conv(embed_dims[2]+embed_dims[3], embed_dims[2])
         # self.donv7 = double_conv(embed_dims[1]+embed_dims[2], embed_dims[1])
