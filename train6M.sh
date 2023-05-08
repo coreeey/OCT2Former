@@ -1,0 +1,12 @@
+ python train.py  --dataset='OCTA-6M' \
+ --num_epochs=1 \
+ --dataset_file_list='utils/OCTA_6M.csv' \
+ --data_root='OCTA_6M/Projection Maps/OCTA(ILM_OPL)' \
+ --data_root_aux='OCTA_6M/Projection Maps/OCT(ILM_OPL)' \
+ --target_root='OCTA_6M/GroundTruth' \
+ --run_dir='6M' \
+ --in_channel=2 \
+ --batch_size=2 \
+ --lr=5e-4 \
+ --img_aug \
+ --cuda_id=6

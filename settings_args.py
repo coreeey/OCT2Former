@@ -2,64 +2,58 @@ import os
 import time
 import csv
 import argparse
-from dataset.dataset_3M import *
 import ml_collections
 import shutil
 
 class basic_setting():
+    parser = argparse.ArgumentParser()
+    # add arguments to the parser
+    parser.add_argument("--dataset", type=str, default="OCTA-3M")
+    parser.add_argument("--mode", type=str, default="train_test")
+    parser.add_argument("--k_fold", type=int, default=None)
+    parser.add_argument("--start_fold", type=int, default=0)
+    parser.add_argument("--end_fold", type=int, default=1)
+    parser.add_argument("--dataset_file_list", type=str, default="utils/OCTA_3M.csv")
+    parser.add_argument("--data_root", type=str, default="./OCTA-500_ground_truth/OCTA_3M/Projection Maps/OCTA(ILM_OPL)")
+    parser.add_argument("--data_root_aux", type=str, default="")
+    parser.add_argument("--target_root", type=str, default="./OCTA-500_ground_truth/OCTA_3M/GroundTruth")
+    parser.add_argument("--test_path", type=str, default="")
+    parser.add_argument("--crop_size", type=tuple, default=(304, 304))
+    parser.add_argument("--depths", type=list, default=[1, 2, 3])
+    parser.add_argument("--patch_size", type=list, default=[2, 2, 2])
+    parser.add_argument("--vit_dims", type=list, default=[64, 128, 256, 512])
+    parser.add_argument("--token_dim", type=list, default=[128, 128, 128])
+    parser.add_argument("--run_dir", type=str, default="3M")
+    parser.add_argument("--val_step", type=int, default=1)
+    parser.add_argument("--in_channel", type=int, default=1)
+    parser.add_argument("--n_class", type=int, default=2)
+    parser.add_argument("--network", type=str, default="OCT2Former")
+    parser.add_argument("--note", type=str, default="")
+    parser.add_argument("--batch_size", type=int, default=2)
+    parser.add_argument("--class_weight", type=list, default=[0.5, 0.5])
+    parser.add_argument("--num_epochs", type=int, default=100)
+    parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--aux", action="store_true")
+    parser.add_argument("--aux_weight", type=float, default=0.4)
+    parser.add_argument("--spec_interpolation", action="store_true")
+    parser.add_argument("--dice_weight", type=int, default=1)
+    parser.add_argument("--lr", type=float, default=5e-4)
+    parser.add_argument("--momentum", type=float, default=0.9)
+    parser.add_argument("--weight_decay", type=float, default=1e-4)
+    parser.add_argument("--cuda_id", type=str, default="0")
+    parser.add_argument("--img_aug", action="store_true")
+    parser.add_argument("--tt_aug", type=bool, default=True)
+    parser.add_argument("--test_run_file", type=str, default="")
+    parser.add_argument("--label_names", type=list, default=[])
+    parser.add_argument("--plot", action="store_true")
 
-    mode = "train_test"     
-    k_fold = None        
-    start_fold = None   
-    end_fold = None     
-
-    dataset_file_list = "utils/OCTA_3M.csv"  
-    data_root = './OCTA_3M/Projection Maps/OCTA(ILM_OPL)'
-    data_root_aux = './OCTA_3M/Projection Maps/OCT(ILM_OPL)'
-    target_root = './OCTA-500_ground_truth/OCTA_3M/GroundTruth'  # 标签
-    test_path = r''
-
-    crop_size = (304, 304)
-    depths=[1, 1, 1]
-    patch_size=[3, 3, 3]
-    over_lap = [2, 2, 2]
-    vit_dims=[64, 128, 256]
-
-    token_dim = [128, 128, 128, 64, 64]   #128最好
-    #token_dim = [400, 300, 200, 100]
-
-    run_dir = "3M"                 
-    val_step = 1                
-
-    in_channel = 1
-    n_class = 2
-    network = "OCT2Former" 
-
-    note = "careful about data root" 
-    
-    batch_size = 2
-
-    class_weight = [0.5, 0.5]
-    OHEM = False
-    num_epochs = 100
-    num_workers = 4
-    aux = False
-    aux_weight = 0.4
-    dice_weight = 1
-    lr = 5e-4
-    #lr = 1e-3
-    momentum = 0.9
-    weight_decay = 1e-4
-    cuda_id = "2"
-
-    img_aug = False
-
-    test_run_file = "test package" 
-    label_names = []
-    plot = True
-
+    args = parser.parse_args()
+    params = vars(args)
 
     def __init__(self):
+        for k, v in self.params.items():
+            setattr(self, k, v)
+
         if not os.path.exists("./runs"):
             os.mkdir("./runs")
         self.run_dir = "./runs/"+self.run_dir
@@ -68,7 +62,6 @@ class basic_setting():
 
         if self.mode == "train" or self.mode == "train_test":
             time_now = time.strftime("%Y-%m%d-%H%M_%S", time.localtime(time.time()))
-
             self.dir = os.path.join(self.run_dir, time_now+"_"+self.network+"_"+str(self.num_epochs)+"epoch"+"_"+self.note + f'_fold_{self.k_fold}')
             os.mkdir(self.dir)
 
@@ -95,12 +88,6 @@ class basic_setting():
                     self.log_dir.append(log_i_dir)
             self.logger(self.dir+"/train_log")
 
-            shutil.copytree('./model', os.path.join(self.dir+ '/code', "model"), shutil.ignore_patterns(['.git', '__pycache__']))
-            shutil.copytree('./utils', os.path.join(self.dir+ '/code', "utils"), shutil.ignore_patterns(['.git', '__pycache__']))
-            shutil.copy('./train3M.py', os.path.join(self.dir + '/code', "train3M.py"), follow_symlinks=False)
-            shutil.copy('./settings_3M.py', os.path.join(self.dir + '/code', "settings_3M.py"), follow_symlinks=False)           
-            shutil.copy('./dataset/dataset_3M.py', os.path.join(self.dir + '/code', "dataset_3M.py"), follow_symlinks=False)
-            shutil.copy('./dataset/transform.py', os.path.join(self.dir + '/code', "transform.py"), follow_symlinks=False)
         if self.mode == "test" or self.mode == "train_test":
             if self.mode == "test":
                 self.dir = os.path.join(self.run_dir, self.test_run_file)
@@ -112,7 +99,6 @@ class basic_setting():
                     for i in range(self.k_fold):
                         fold_i_dir = os.path.join(self.checkpoint_dir[0], f"fold_{i+1}")
                         self.checkpoint_dir.append(fold_i_dir)
-
             self.test_result_file = os.path.join(self.dir, "test_result.csv")
             with open(self.test_result_file, "w") as f:
                 w = csv.writer(f)
@@ -122,7 +108,6 @@ class basic_setting():
                         ['mSens'] + [name + "_sens" for name in self.label_names[1:]] + \
                         ['mSpec'] + [name + "_spec" for name in self.label_names[1:]]
                 w.writerow(title)
-
             if self.plot:
                 self.plot_save_dir = os.path.join(self.dir, "test_images")
                 if not os.path.exists(self.plot_save_dir):
@@ -135,3 +120,6 @@ class basic_setting():
                 if ("__"or "test_" or "val_" or "root" or "logger" or "dir") not in att:
                     f.write(f'{str(att)}:    {str(getattr(self, att))}\n\n')
             f.close()
+
+if __name__ == '__main__':
+    args = basic_setting()

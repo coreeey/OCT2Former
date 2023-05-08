@@ -1,0 +1,12 @@
+ python train.py  --dataset='OCTA-SS' \
+ --num_epochs=100 \
+ --dataset_file_list='utils/OCTA-SS.csv' \
+ --data_root='OCTA-SS/images/train' \
+ --target_root='OCTA-SS/label/segmented_images' \
+ --run_dir='OCTA-SS' \
+ --in_channel=1 \
+ --batch_size=2 \
+ --lr=5e-4 \
+ --spec_interpolation \
+ --img_aug \
+ --cuda_id=6 \
