@@ -1,8 +1,7 @@
-![Python 3.9](https://img.shields.io/badge/python-3.6-green.svg)
+![Python 3.9](https://img.shields.io/badge/Python-3.9-3776AB)
 <span id="jump1"></span>
 # OCT2Former
 The official code of OCT2Former: A retinal OCT-angiography vessel segmentation transformer
-## The Code is being organized.
 
 Prerequisites
 * python3
