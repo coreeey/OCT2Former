@@ -17,7 +17,7 @@ Prerequisites
 
 <span id="jump2"></span>
 ### FOR OCTA-SS dataset
- python train.py  --dataset='OCTA-SS' 
+ > python train.py  --dataset='OCTA-SS' 
  --num_epochs=100 \
  --dataset_file_list='utils/OCTA-SS.csv' \
  --data_root=$OCTA-SS-DATA-PATH \
@@ -27,10 +27,11 @@ Prerequisites
  --batch_size=2 \
  --lr=5e-4 \
  --spec_interpolation \
- --img_aug \
- --cuda_id=6 \
+ --img_aug 
+ 
  OR
- sh trainSS.sh
+ 
+ > sh trainSS.sh
 
 
 ### FOR ROSE1 dataset
@@ -43,14 +44,15 @@ Prerequisites
  --in_channel=1 \
  --batch_size=2 \
  --lr=5e-4 \
- --img_aug \
- --cuda_id=6 
+ --img_aug 
+ 
  OR
+ 
  > sh trainROSE.sh
  
  
 ### FOR OCTA-6M dataset
- python train.py  
+ > python train.py  
  --dataset='OCTA-6M' \
  --num_epochs=100 \
  --dataset_file_list='utils/OCTA_6M.csv' \
@@ -63,11 +65,13 @@ Prerequisites
  --lr=5e-4 \
  --img_aug \
  --cuda_id=6
+ 
  OR
- sh train6M.sh
+ 
+ > sh train6M.sh
 
 ### FOR OCTA-3M dataset
- python train.py  
+ > python train.py  
  --dataset='OCTA-3M' \
  --num_epochs=100 \
  --dataset_file_list='utils/OCTA_3M.csv' \
@@ -79,6 +83,7 @@ Prerequisites
  --batch_size=2 \
  --lr=5e-4 \
  --img_aug \
- --cuda_id=6
+ 
  OR
- sh train3M.sh
+ 
+ > sh train3M.sh
